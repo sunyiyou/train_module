@@ -22,13 +22,6 @@ from sklearn.model_selection import cross_val_score
 import data
 import torchvision
 
-
-# python train_supcon.py --in-dataset imagenet --model-arch resnet50 --name resnet50-supce --training-mode SupCE --lr 0.001 --beta 100 -b 512 --epochs 200
-# python train_supcon.py --in-dataset CIFAR-100 --model-arch resnet34 --name resnet34-supce --training-mode SupCE --lr 0.5 --beta 0.5 -b 512 --epochs 500
-# python train_supcon.py --in-dataset CIFAR-10 --model-arch resnet18 --name resnet18-supce --training-mode SupCE --lr 0.5 --beta 0.5 -b 512 --epochs 500
-# CUDA_VISIBLE_DEVICES=0,1,2,3 python train_supcon.py --in-dataset CIFAR-10 --model-arch densenet --name densenet-supcon --training-mode SupCon --lr 0.25 --beta 0.5 -b 256 --epochs 500
-# CUDA_VISIBLE_DEVICES=4,5,6,7 python train_supcon.py --in-dataset CIFAR-100 --model-arch densenet --name densenet-supcon --training-mode SupCon --lr 0.25 --beta 0.5 -b 256 --epochs 500
-
 parser = argparse.ArgumentParser(description='PyTorch DenseNet Training')
 parser.add_argument('--gpu', default='0', type=str, help='which gpu to use')
 
@@ -217,12 +210,7 @@ def main():
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
-    # transform_train = transforms.Compose([
-    #     transforms.RandomCrop(32, padding=4),
-    #     transforms.RandomHorizontalFlip(),
-    #     transforms.ToTensor(),
-    #     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-    # ])
+
     transform_train = transforms.Compose([
         transforms.RandomResizedCrop(32, scale=(0.2, 1.0)),
         transforms.RandomHorizontalFlip(),
@@ -286,7 +274,6 @@ def main():
             model.load_state_dict(state_dict)
     else:
         from models.resnet_ss import resnet18_cifar, resnet34_cifar, resnet50_cifar, resnet101_cifar
-        from models.densenet_ss import DenseNet3
         if args.model_arch.find('resnet18') > -1:
             model = resnet18_cifar(num_classes=num_classes, p=args.p, method=args.inference_method)
         elif args.model_arch.find('resnet50') > -1:
@@ -295,8 +282,6 @@ def main():
             model = resnet34_cifar(num_classes=num_classes, p=args.p, method=args.inference_method)
         elif args.model_arch.find('resnet101') > -1:
             model = resnet101_cifar(num_classes=num_classes, p=args.p, method=args.inference_method)
-        elif args.model_arch.find('densenet') > -1:
-            model = DenseNet3(args.layers, num_classes, args.growth, reduction=args.reduce, bottleneck=args.bottleneck)
         else:
             assert False, 'Not supported model arch: {}'.format(args.model_arch)
         # optionally resume from a checkpoint
